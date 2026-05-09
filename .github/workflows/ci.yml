@@ -25,15 +25,31 @@ jobs:
       - name: Run tests
         run: npm test
 
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     needs: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t cicd-practice:${{ github.sha }} .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Show image size
-        run: docker images cicd-practice
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            sandeep2862/cicd-practice:latest
+            sandeep2862/cicd-practice:${{ github.sha }}
+
+      - name: Print image details
+        run: |
+          echo "Image pushed successfully!"
+          echo "Tags:"
+          echo "  sandeep2862/cicd-practice:latest"
+          echo "  sandeep2862/cicd-practice:${{ github.sha }}"
