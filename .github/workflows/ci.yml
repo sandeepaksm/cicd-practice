@@ -5,30 +5,34 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  APP_NAME: cicd-practice
+  APP_VERSION: 1.0.0
+
 jobs:
-  job1:
+  test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Job 1 running
-        run: |
-          echo "I am Job 1"
-          sleep 3
-          echo "Job 1 done"
 
-  job2:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Job 2 running
-        run: |
-          echo "I am Job 2"
-          sleep 3
-          echo "Job 2 done"
+    env:
+      NODE_ENV: test
 
-  job3:
-    runs-on: ubuntu-latest
-    needs: [job1, job2]
     steps:
-      - name: Job 3 running
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show environment variables
         run: |
-          echo "Job 1 and Job 2 finished"
-          echo "Now I can run Job 3"
+          echo "App name: $APP_NAME"
+          echo "App version: $APP_VERSION"
+          echo "Node env: $NODE_ENV"
+          echo "GitHub repo: $GITHUB_REPOSITORY"
+          echo "GitHub actor: $GITHUB_ACTOR"
+          echo "Commit SHA: $GITHUB_SHA"
+          echo "Branch: $GITHUB_REF_NAME"
+
+      - name: Use a secret
+        env:
+          MY_SECRET: ${{ secrets.MY_SECRET }}
+        run: |
+          echo "Secret is set: ${{ secrets.MY_SECRET != '' }}"
+          echo "Secret value is hidden: $MY_SECRET"
