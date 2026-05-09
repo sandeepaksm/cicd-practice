@@ -47,9 +47,24 @@ jobs:
             sandeep2862/cicd-practice:latest
             sandeep2862/cicd-practice:${{ github.sha }}
 
-      - name: Print image details
-        run: |
-          echo "Image pushed successfully!"
-          echo "Tags:"
-          echo "  sandeep2862/cicd-practice:latest"
-          echo "  sandeep2862/cicd-practice:${{ github.sha }}"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull sandeep2862/cicd-practice:latest
+            docker stop cicd-app || true
+            docker rm cicd-app || true
+            docker run -d \
+              --name cicd-app \
+              -p 3000:3000 \
+              --restart unless-stopped \
+              sandeep2862/cicd-practice:latest
+            echo "Deployed successfully!"
+            docker ps | grep cicd-app
