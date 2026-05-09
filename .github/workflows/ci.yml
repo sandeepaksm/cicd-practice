@@ -28,9 +28,6 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Print Node version
-        run: node --version
-
   build-and-push:
     runs-on: ubuntu-latest
     needs: test
@@ -52,3 +49,25 @@ jobs:
           tags: |
             sandeep2862/cicd-practice:latest
             sandeep2862/cicd-practice:${{ github.sha }}
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to STAGING environment"
+          echo "Image: sandeep2862/cicd-practice:${{ github.sha }}"
+          echo "Staging deployment complete!"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment: production
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Deploying to PRODUCTION environment"
+          echo "Image: sandeep2862/cicd-practice:${{ github.sha }}"
+          echo "Production deployment complete!"
